@@ -495,7 +495,7 @@ impl LiveSeg {
             let Some(idx) = fields.iter().position(|(n, _)| n == fld) else {
                 continue;
             };
-            let idx = idx as u8;
+            let idx = idx as u16;
             // immutable-first, matching the base builder's by_data (aa_builder.rs push_asset) exactly —
             // so the overlay's facet key for an asset equals the one the frozen base indexed it under.
             let val = immutable
@@ -1095,11 +1095,11 @@ impl LiveSeg {
         let facet_field = self.facet_fields.first().cloned().unwrap_or_default();
 
         // rarity field index per schema (so the asset loop doesn't re-decode the schema 232M times).
-        let mut facet_idx: HashMap<u64, u8> = HashMap::new();
+        let mut facet_idx: HashMap<u64, u16> = HashMap::new();
         self.base.for_each_entry(TABLE_AA_SCHEMAS, |key, blob| {
             let fields = decode_schema_format(blob);
             if let Some(p) = fields.iter().position(|(n, _)| *n == facet_field) {
-                facet_idx.insert(key, p as u8);
+                facet_idx.insert(key, p as u16);
             }
         });
 
@@ -1245,7 +1245,7 @@ impl LiveSeg {
 /// field index (base-unchanged assets).
 fn fold_emit(
     b: &mut AtomicBuilder,
-    facet_idx: &HashMap<u64, u8>,
+    facet_idx: &HashMap<u64, u16>,
     facet_field: &str,
     aid: u64,
     a: &AssetLive,
@@ -1410,7 +1410,7 @@ mod tests {
                     template_id: 7,
                     facet_key: Some(fkey("rarity", "Mythic")),
                     immutable: vec![],
-                    mutable: vec![(1u8, "Mythic".to_string())],
+                    mutable: vec![(1u16, "Mythic".to_string())],
                 }),
             ],
         );
@@ -1570,7 +1570,7 @@ mod tests {
                 template_id: 7,
                 facet_key: Some(fkey("rarity", "Mythic")),
                 immutable: vec![],
-                mutable: vec![(1u8, "Mythic".to_string())],
+                mutable: vec![(1u16, "Mythic".to_string())],
             })],
         );
         let ov = live.overlay();
@@ -1606,7 +1606,7 @@ mod tests {
             101,
             &[Delta::SetData(SetDataD {
                 asset_id: 1002,
-                mutable: vec![(1u8, "Mythic".to_string())],
+                mutable: vec![(1u16, "Mythic".to_string())],
                 facet_old: Some(fkey("rarity", "Common")),
                 facet_new: Some(fkey("rarity", "Mythic")),
             })],
@@ -1658,7 +1658,7 @@ mod tests {
                 Delta::Burn(BurnD { asset_id: 1001 }),
                 Delta::SetData(SetDataD {
                     asset_id: 1002,
-                    mutable: vec![(1u8, "Mythic".to_string())],
+                    mutable: vec![(1u16, "Mythic".to_string())],
                     facet_old: Some(fkey("rarity", "Common")),
                     facet_new: Some(fkey("rarity", "Mythic")),
                 }),
@@ -1671,7 +1671,7 @@ mod tests {
                     template_id: 7,
                     facet_key: Some(fkey("rarity", "Mythic")),
                     immutable: vec![],
-                    mutable: vec![(1u8, "Mythic".to_string())],
+                    mutable: vec![(1u16, "Mythic".to_string())],
                 }),
             ],
         );
